@@ -391,6 +391,184 @@
             color: #8b92a0;
             font-weight: 600;
         }
+    
+        /* ===================================================
+           F9 KEYBIND MODAL OVERLAY (LUXURY OBSIDIAN)
+           =================================================== */
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(6, 7, 10, 0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            animation: modalFadeIn 0.16s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.97); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-card {
+            width: 400px;
+            background: #0d0e13;
+            border-radius: 12px;
+            border: 1px solid #1f232d;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.95), 0 0 25px rgba(129, 140, 248, 0.12);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            height: 48px;
+            background: #111319;
+            border-bottom: 1px solid #1c1f28;
+            border-top: 2px solid #818cf8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 18px;
+        }
+
+        .modal-title-wrap {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-supertitle {
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #ffffff;
+            line-height: 1.1;
+        }
+
+        .modal-title {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #818cf8;
+        }
+
+        .modal-badge {
+            font-size: 11px;
+            font-weight: 700;
+            color: #818cf8;
+            background: #141720;
+            border: 1px solid #232838;
+            padding: 3px 8px;
+            border-radius: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-subheader {
+            height: 25px;
+            background: #090a0d;
+            border-bottom: 1px solid #16181f;
+            color: #8b92a0;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            display: flex;
+            align-items: center;
+            padding: 0 18px;
+            text-transform: uppercase;
+        }
+
+        .modal-body {
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #0b0c10;
+        }
+
+        .modal-feature-row {
+            height: 38px;
+            background: #13151b;
+            border-radius: 6px;
+            border-left: 3px solid #818cf8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+        }
+
+        .modal-feature-name {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .modal-bound-key {
+            font-size: 12px;
+            font-weight: 700;
+            color: #818cf8;
+            background: #1a1d26;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid #2b3142;
+        }
+
+        .modal-prompt-box {
+            height: 42px;
+            background: rgba(129, 140, 248, 0.06);
+            border: 1px solid rgba(129, 140, 248, 0.35);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            animation: promptPulse 1.8s infinite ease-in-out;
+        }
+
+        @keyframes promptPulse {
+            0%, 100% {
+                border-color: rgba(129, 140, 248, 0.35);
+                box-shadow: 0 0 8px rgba(129, 140, 248, 0.1);
+            }
+            50% {
+                border-color: rgba(129, 140, 248, 0.75);
+                box-shadow: 0 0 16px rgba(129, 140, 248, 0.25);
+            }
+        }
+
+        .modal-prompt-icon {
+            font-size: 14px;
+        }
+
+        .modal-prompt-text {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #e2e8f0;
+        }
+
+        .modal-footer {
+            height: 30px;
+            background: #08090c;
+            border-top: 1px solid #16181f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 10.5px;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .modal-footer-sep {
+            color: #334155;
+        }
+
     </style>
 </head>
 <body>
@@ -453,6 +631,35 @@
                 <span class="footer-left" id="footer-left">Build 49488 | discord.gg/phantommenu</span>
                 <span class="footer-right" id="footer-right">1 / 1</span>
             </div>
+
+            <!-- F9 Keybind Modal Overlay -->
+            <div class="modal-overlay" id="keybind-modal" style="display: none;">
+                <div class="modal-card">
+                    <div class="modal-header">
+                        <div class="modal-title-wrap">
+                            <span class="modal-supertitle">PHANTOM</span>
+                            <span class="modal-title">KEYBIND CONFIGURATION</span>
+                        </div>
+                        <div class="modal-badge">[ BIND ]</div>
+                    </div>
+                    <div class="modal-subheader">AUSGEWÄHLTE OPTION ZUM BELEGEN</div>
+                    <div class="modal-body">
+                        <div class="modal-feature-row">
+                            <div class="modal-feature-name" id="modal-opt-name">► OPTION</div>
+                            <div class="modal-bound-key" id="modal-bound-key">[ KEINE TASTE ]</div>
+                        </div>
+                        <div class="modal-prompt-box">
+                            <span class="modal-prompt-icon">⌨</span>
+                            <span class="modal-prompt-text">DRÜCKE EINE BELIEBIGE TASTE ZUM BELEGEN...</span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <span>[ESC] Abbrechen</span>
+                        <span class="modal-footer-sep">|</span>
+                        <span>[ENTF] Bind entfernen</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -474,6 +681,30 @@
         const footerLeftEl = document.getElementById("footer-left");
         const footerRightEl = document.getElementById("footer-right");
         const scrollThumbEl = document.getElementById("scroll-thumb");
+
+        
+        let modalState = {
+            open: false,
+            optName: "",
+            boundKey: ""
+        };
+
+        const modalOverlayEl = document.getElementById("keybind-modal");
+        const modalOptNameEl = document.getElementById("modal-opt-name");
+        const modalBoundKeyEl = document.getElementById("modal-bound-key");
+
+        function updateModal() {
+            if (!modalOverlayEl) return;
+            if (modalState.open) {
+                modalOverlayEl.style.display = "flex";
+                if (modalOptNameEl) modalOptNameEl.textContent = "► " + (modalState.optName || "OPTION");
+                if (modalBoundKeyEl) {
+                    modalBoundKeyEl.textContent = modalState.boundKey ? `[ ${modalState.boundKey} ]` : "[ KEINE TASTE ]";
+                }
+            } else {
+                modalOverlayEl.style.display = "none";
+            }
+        }
 
         function render() {
             if (!state || !state.items) return;
@@ -592,7 +823,19 @@
             }
             if (!data) return;
 
-            if (data.action === "sync") {
+                        if (data.action === "setModal") {
+                if (data.modal === "keybind") {
+                    modalState.open = true;
+                    modalState.optName = data.optName || "";
+                    modalState.boundKey = data.boundKey || "";
+                } else {
+                    modalState.open = false;
+                }
+                updateModal();
+            } else if (data.action === "closeModal") {
+                modalState.open = false;
+                updateModal();
+            } else if (data.action === "sync") {
                 if (data.state) {
                     state = Object.assign(state, data.state);
                     render();

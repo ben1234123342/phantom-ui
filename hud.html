@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHANTOM HUD - Spectator Radar & Keybinds</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow: hidden;
+            width: 360px;
+            height: 640px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 10px;
+        }
+
+        /* ===================================================
+           LUXURY OBSIDIAN HUD CARD
+           =================================================== */
+        .hud-card {
+            width: 100%;
+            background: #0d0e13;
+            border-radius: 12px;
+            border: 1px solid #1a1c22;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.92);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .hud-card.alert {
+            border-color: rgba(239, 68, 68, 0.45);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.92), 0 0 25px rgba(239, 68, 68, 0.2);
+        }
+
+        /* 1. Header Banner */
+        .hud-banner {
+            height: 48px;
+            background: #111318;
+            border-bottom: 1px solid #1c1f26;
+            border-top: 2px solid #818cf8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: relative;
+        }
+
+        .hud-card.alert .hud-banner {
+            border-top-color: #ef4444;
+        }
+
+        .hud-title-wrap {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hud-supertitle {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #ffffff;
+            line-height: 1.1;
+        }
+
+        .hud-title {
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            color: #818cf8;
+        }
+
+        .hud-card.alert .hud-title {
+            color: #f87171;
+        }
+
+        /* Counter Pill */
+        .hud-counter-pill {
+            font-size: 11px;
+            font-weight: 700;
+            color: #cbd5e1;
+            background: #161820;
+            border: 1px solid #242834;
+            padding: 3px 10px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .hud-counter-pill.alert {
+            color: #fecaca;
+            background: rgba(185, 28, 28, 0.35);
+            border-color: #ef4444;
+            animation: pulseThreat 1.4s infinite ease-in-out;
+        }
+
+        @keyframes pulseThreat {
+            0%, 100% { box-shadow: 0 0 5px rgba(239, 68, 68, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.7); }
+        }
+
+        /* 2. Sub-Header Bar */
+        .hud-subheader {
+            height: 24px;
+            background: #08090c;
+            border-bottom: 1px solid #16181f;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 8px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            color: #8b92a0;
+            text-transform: uppercase;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 6px #22c55e;
+        }
+
+        .status-dot.alert {
+            background: #ef4444;
+            box-shadow: 0 0 8px #ef4444;
+        }
+
+        /* 3. Content List */
+        .hud-list {
+            display: flex;
+            flex-direction: column;
+            background: #090a0d;
+            max-height: 220px;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+
+        .hud-list::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hud-row {
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+            border-bottom: 1px solid #13151b;
+            color: #e2e8f0;
+            font-size: 12.5px;
+            font-weight: 500;
+            position: relative;
+            transition: background 0.1s ease;
+        }
+
+        .hud-row:last-child {
+            border-bottom: none;
+        }
+
+        .hud-row:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .row-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .id-badge {
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            background: #14161c;
+            border: 1px solid #1f232d;
+            padding: 1px 6px;
+            border-radius: 4px;
+        }
+
+        .key-badge {
+            font-size: 11px;
+            font-weight: 700;
+            color: #818cf8;
+            background: #141722;
+            border: 1px solid rgba(129, 140, 248, 0.35);
+            padding: 2px 7px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .name-text {
+            color: #f1f5f9;
+            font-size: 12.5px;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 170px;
+        }
+
+        .dist-badge {
+            font-size: 11px;
+            font-weight: 700;
+            color: #f87171;
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .status-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.on {
+            color: #4ade80;
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+        }
+
+        .status-badge.off {
+            color: #f87171;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+
+        .status-badge.act {
+            color: #818cf8;
+            background: rgba(129, 140, 248, 0.15);
+            border: 1px solid rgba(129, 140, 248, 0.35);
+        }
+
+        /* Empty State */
+        .empty-row {
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.6px;
+            background: #090a0d;
+        }
+
+        /* 4. Footer Bar */
+        .hud-footer {
+            height: 24px;
+            background: #07080a;
+            border-top: 1px solid #14161c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            color: #475569;
+        }
+    </style>
+</head>
+<body>
+    <!-- 1. SPECTATOR RADAR CARD -->
+    <div class="hud-card" id="spectator-card" style="display: none;">
+        <div class="hud-banner">
+            <div class="hud-title-wrap">
+                <span class="hud-supertitle">PHANTOM</span>
+                <span class="hud-title" id="spec-banner-title">SPECTATOR RADAR</span>
+            </div>
+            <div class="hud-counter-pill" id="spec-counter">0</div>
+        </div>
+        <div class="hud-subheader">
+            <div class="status-dot" id="spec-status-dot"></div>
+            <span id="spec-status-text">0 DETECTED · SECURE</span>
+        </div>
+        <div class="hud-list" id="spec-list">
+            <div class="empty-row">KEINE BEOBACHTER GEFUNDEN</div>
+        </div>
+        <div class="hud-footer">LIVE RADAR SCAN</div>
+    </div>
+
+    <!-- 2. ACTIVE KEYBINDS CARD -->
+    <div class="hud-card" id="keybind-card" style="display: none;">
+        <div class="hud-banner">
+            <div class="hud-title-wrap">
+                <span class="hud-supertitle">PHANTOM</span>
+                <span class="hud-title">ACTIVE KEYBINDS</span>
+            </div>
+            <div class="hud-counter-pill" id="bind-counter">0</div>
+        </div>
+        <div class="hud-subheader">
+            <span style="color: #64748b;">HOTKEY ➜ FEATURE</span>
+        </div>
+        <div class="hud-list" id="bind-list">
+            <div class="empty-row">KEINE KEYBINDS KONFIGURIERT</div>
+        </div>
+        <div class="hud-footer">[F12 / F9] BIND MANAGER</div>
+    </div>
+
+    <script>
+        const specCardEl = document.getElementById("spectator-card");
+        const specCounterEl = document.getElementById("spec-counter");
+        const specStatusDotEl = document.getElementById("spec-status-dot");
+        const specStatusTextEl = document.getElementById("spec-status-text");
+        const specListEl = document.getElementById("spec-list");
+
+        const bindCardEl = document.getElementById("keybind-card");
+        const bindCounterEl = document.getElementById("bind-counter");
+        const bindListEl = document.getElementById("bind-list");
+
+        function renderHud(data) {
+            // ==========================================
+            // 1. SPECTATOR RADAR
+            // ==========================================
+            const specActive = data.spectatorListActive === true;
+            const spectators = data.spectators || [];
+            const isMenuOpen = data.isMenuOpen === true;
+
+            if (specActive && (spectators.length > 0 || isMenuOpen)) {
+                specCardEl.style.display = "flex";
+                const isAlert = spectators.length > 0;
+
+                if (isAlert) {
+                    specCardEl.classList.add("alert");
+                    specCounterEl.className = "hud-counter-pill alert";
+                    specCounterEl.textContent = `! ${spectators.length}`;
+                    specStatusDotEl.className = "status-dot alert";
+                    specStatusTextEl.textContent = `! THREATS DETECTED (${spectators.length})`;
+                } else {
+                    specCardEl.classList.remove("alert");
+                    specCounterEl.className = "hud-counter-pill";
+                    specCounterEl.textContent = "0";
+                    specStatusDotEl.className = "status-dot";
+                    specStatusTextEl.textContent = "0 DETECTED · SECURE";
+                }
+
+                if (spectators.length === 0) {
+                    specListEl.innerHTML = `<div class="empty-row">KEINE BEOBACHTER GEFUNDEN</div>`;
+                } else {
+                    let html = "";
+                    spectators.forEach(spec => {
+                        html += `
+                            <div class="hud-row">
+                                <div class="row-left">
+                                    <span class="id-badge">#${spec.id || 0}</span>
+                                    <span class="name-text">${spec.name || "Spectator"}</span>
+                                </div>
+                                <span class="dist-badge">${spec.dist || 0}m</span>
+                            </div>
+                        `;
+                    });
+                    specListEl.innerHTML = html;
+                }
+            } else {
+                specCardEl.style.display = "none";
+            }
+
+            // ==========================================
+            // 2. ACTIVE KEYBINDS
+            // ==========================================
+            const bindActive = data.keybindHudActive === true;
+            const keybinds = data.keybinds || [];
+
+            if (bindActive && (keybinds.length > 0 || isMenuOpen)) {
+                bindCardEl.style.display = "flex";
+                bindCounterEl.textContent = `${keybinds.length}`;
+
+                if (keybinds.length === 0) {
+                    bindListEl.innerHTML = `<div class="empty-row">KEINE KEYBINDS KONFIGURIERT</div>`;
+                } else {
+                    let html = "";
+                    keybinds.forEach(bind => {
+                        let badgeClass = "act";
+                        let badgeText = "[ACT]";
+                        if (bind.active === true) {
+                            badgeClass = "on";
+                            badgeText = "[ON]";
+                        } else if (bind.active === false) {
+                            badgeClass = "off";
+                            badgeText = "[OFF]";
+                        }
+
+                        html += `
+                            <div class="hud-row">
+                                <div class="row-left">
+                                    <span class="key-badge">${bind.keyName || "?"}</span>
+                                    <span class="name-text">${bind.label || "Option"}</span>
+                                </div>
+                                <span class="status-badge ${badgeClass}">${badgeText}</span>
+                            </div>
+                        `;
+                    });
+                    bindListEl.innerHTML = html;
+                }
+            } else {
+                bindCardEl.style.display = "none";
+            }
+        }
+
+        // Nachricht von FiveM Lua via SendDuiMessage
+        window.addEventListener("message", function(event) {
+            let data = event.data;
+            if (!data) return;
+
+            if (typeof data === "string") {
+                try {
+                    data = JSON.parse(data);
+                } catch(e) {
+                    return;
+                }
+            }
+            if (!data) return;
+
+            if (data.action === "syncHud") {
+                renderHud(data);
+            }
+        });
+    </script>
+</body>
+</html>
