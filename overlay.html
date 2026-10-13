@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHANTOM - Overlay System</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        html, body {
+            background-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            pointer-events: none;
+        }
+
+        /* ===================================================
+           1. AC DETECTION BADGE (OBEN IN DER MITTE - 1:1 SCREENSHOT)
+           =================================================== */
+        .ac-badge {
+            position: fixed;
+            left: 50%;
+            top: 22px;
+            transform: translateX(-50%);
+            background: rgba(14, 15, 20, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-top: 2.5px solid #a855f7; /* Violetter Akzentstrich wie im Screenshot */
+            border-radius: 4px;
+            padding: 6px 18px;
+            display: none;
+            align-items: center;
+            gap: 9px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 16px rgba(168, 85, 247, 0.22);
+            z-index: 10000;
+            pointer-events: none;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.35px;
+            color: #f1f5f9;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            opacity: 0;
+        }
+
+        .ac-badge.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .ac-badge.detected {
+            border-color: rgba(239, 68, 68, 0.65);
+            border-top: 2.5px solid #a855f7;
+            background: rgba(20, 12, 16, 0.96);
+            box-shadow: 0 4px 22px rgba(239, 68, 68, 0.35), 0 0 16px rgba(168, 85, 247, 0.25);
+        }
+
+        .ac-badge.detected #ac-badge-dot {
+            background: #ef4444;
+            box-shadow: 0 0 8px #ef4444;
+        }
+
+        .ac-badge.clean {
+            border-color: rgba(34, 197, 94, 0.5);
+            border-top: 2.5px solid #a855f7;
+            background: rgba(10, 20, 15, 0.96);
+            box-shadow: 0 4px 22px rgba(34, 197, 94, 0.25);
+        }
+
+        .ac-badge.clean #ac-badge-dot {
+            background: #22c55e;
+            box-shadow: 0 0 8px #22c55e;
+        }
+
+        .ac-badge-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #a855f7;
+            box-shadow: 0 0 6px #a855f7;
+            flex-shrink: 0;
+        }
+
+        /* ===================================================
+           2. LOADING SCREEN (REINER BALKEN & TEXT OHNE BOX DRUMHERUM)
+           =================================================== */
+        #loading-screen {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 290px;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            z-index: 99999;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-status {
+            font-size: 14px;
+            font-weight: 600;
+            color: #f8fafc;
+            letter-spacing: 0.5px;
+            text-align: center;
+            min-height: 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 0 6px rgba(0, 0, 0, 0.9);
+        }
+
+        .loading-bar-wrapper {
+            width: 100%;
+            height: 3.5px;
+            background: rgba(15, 17, 23, 0.75);
+            border-radius: 3px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        .loading-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #9333ea, #c084fc);
+            border-radius: 3px;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 10px #a855f7;
+        }
+
+        /* ===================================================
+           3. SPECTATOR LIST WIDGET (RECHTS OBEN - NUR WENN LEUTE DA SIND)
+           =================================================== */
+        #spectator-widget {
+            position: fixed;
+            top: 70px;
+            right: 24px;
+            width: 210px;
+            background: rgba(13, 15, 22, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.11);
+            border-top: 2px solid #ef4444; /* Rot für Spectator-Alarm */
+            border-radius: 6px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), 0 0 12px rgba(239, 68, 68, 0.25);
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            z-index: 10000;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .widget-header {
+            height: 28px;
+            background: rgba(8, 10, 15, 0.98);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            color: #ffffff;
+            text-transform: uppercase;
+        }
+
+        .widget-dot-red {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 0 0 6px #ef4444;
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.85); }
+        }
+
+        .widget-body {
+            padding: 6px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .spec-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11.5px;
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+
+        .spec-role-admin {
+            font-size: 9.5px;
+            font-weight: 700;
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            padding: 1px 5px;
+            border-radius: 3px;
+        }
+
+        /* ===================================================
+           4. KEYBINDS INFO OVERLAY (LINKS OBEN)
+           =================================================== */
+        #keybinds-widget {
+            position: fixed;
+            top: 70px;
+            left: 24px;
+            width: 215px;
+            background: rgba(13, 15, 22, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.11);
+            border-top: 2px solid #a855f7;
+            border-radius: 6px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            z-index: 10000;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .keybind-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        .keybind-badge {
+            background: rgba(168, 85, 247, 0.16);
+            color: #c084fc;
+            border: 1px solid rgba(168, 85, 247, 0.45);
+            border-radius: 3px;
+            padding: 1px 6px;
+            font-weight: 700;
+            font-size: 10.5px;
+        }
+
+        /* ===================================================
+           5. INTERACTIVE "ENTER A KEY" MODAL (GRAUER HINTERGRUND)
+           =================================================== */
+        #rebind-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(6, 8, 12, 0.68);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999999;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .rebind-box {
+            width: 320px;
+            background: #0f1118;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-top: 2.5px solid #a855f7;
+            border-radius: 10px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95), 0 0 25px rgba(168, 85, 247, 0.28);
+            padding: 24px 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .rebind-title {
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            color: #ffffff;
+            text-transform: uppercase;
+        }
+
+        .rebind-action-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #c084fc;
+            background: rgba(168, 85, 247, 0.12);
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            padding: 5px 14px;
+            border-radius: 5px;
+        }
+
+        .rebind-subtext {
+            font-size: 11.5px;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        .rebind-hint {
+            font-size: 10.5px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* ===================================================
+           6. FOV & SNAPLINE OVERLAYS
+           =================================================== */
+        #fov-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- 1. AC Detection Badge (Oben in der Mitte - 1:1 Screenshot) -->
+    <div id="ac-badge" class="ac-badge">
+        <div class="ac-badge-dot" id="ac-badge-dot"></div>
+        <span id="ac-badge-text">Detected AntiCheat(s): WaveShield, ElectronAC</span>
+    </div>
+
+    <!-- 2. Loading Screen (Reiner Balken & Text ohne Box drumherum) -->
+    <div id="loading-screen">
+        <div class="loading-status" id="loading-status">Authenticating...</div>
+        <div class="loading-bar-wrapper">
+            <div class="loading-bar-fill" id="loading-bar-fill"></div>
+        </div>
+    </div>
+
+        <!-- 3. HUD Right Stack: Spectator List & Luxury 2D Tactical Radar -->
+    <div class="hud-right-stack">
+        <!-- Spectator List Widget -->
+        <div id="spectator-widget">
+            <div class="widget-header">
+                <span>Spectators (<span id="spec-count">0</span>)</span>
+                <div class="widget-dot-green" id="spec-header-dot"></div>
+            </div>
+            <div class="widget-body" id="spec-list-body">
+                <!-- Dynamisch befüllt -->
+            </div>
+        </div>
+
+        <!-- 2D Tactical Circular Radar Widget -->
+        <div id="radar-widget">
+            <div class="radar-header">
+                <div class="radar-header-left">
+                    <span class="radar-brand-tag">PHANTOM</span>
+                    <span class="radar-title-tag">RADAR</span>
+                </div>
+                <div class="radar-range-pill" id="radar-range-text">100m</div>
+            </div>
+            <div class="radar-viewport">
+                <svg id="radar-svg" viewBox="-100 -100 200 200" width="186" height="186">
+                    <defs>
+                        <radialGradient id="radar-bg-glow" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#141726" stop-opacity="0.95" />
+                            <stop offset="65%" stop-color="#0c0e16" stop-opacity="0.96" />
+                            <stop offset="100%" stop-color="#07080d" stop-opacity="0.98" />
+                        </radialGradient>
+                        <linearGradient id="sweep-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#a855f7" stop-opacity="0.32" />
+                            <stop offset="100%" stop-color="#a855f7" stop-opacity="0.0" />
+                        </linearGradient>
+                        <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+                            <feGaussianBlur stdDeviation="2.2" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                    </defs>
+
+                    <!-- Circular Background Frame -->
+                    <circle cx="0" cy="0" r="95" fill="url(#radar-bg-glow)" stroke="rgba(168, 85, 247, 0.45)" stroke-width="1.5" />
+
+                    <!-- Concentric Distance Rings -->
+                    <circle cx="0" cy="0" r="28" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="0.7" stroke-dasharray="2 2" />
+                    <circle cx="0" cy="0" r="56" fill="none" stroke="rgba(168, 85, 247, 0.28)" stroke-width="0.8" />
+                    <circle cx="0" cy="0" r="84" fill="none" stroke="rgba(255, 255, 255, 0.10)" stroke-width="0.8" stroke-dasharray="3 3" />
+
+                    <!-- Crosshairs -->
+                    <line x1="-92" y1="0" x2="92" y2="0" stroke="rgba(255, 255, 255, 0.08)" stroke-width="0.8" />
+                    <line x1="0" y1="-92" x2="0" y2="92" stroke="rgba(255, 255, 255, 0.08)" stroke-width="0.8" />
+
+                    <!-- Radar Sweep Beam -->
+                    <g id="radar-sweep-group">
+                        <path d="M 0 0 L 0 -92 A 92 92 0 0 1 65 -65 Z" fill="url(#sweep-grad)" />
+                        <line x1="0" y1="0" x2="0" y2="-92" stroke="#c084fc" stroke-width="1.2" opacity="0.85" />
+                    </g>
+
+                    <!-- Rotating Compass Rose (N, E, S, W) -->
+                    <g id="radar-compass-group">
+                        <text x="0" y="-81" text-anchor="middle" fill="#c084fc" font-size="8.5" font-weight="800">N</text>
+                        <text x="83" y="3" text-anchor="middle" fill="#94a3b8" font-size="7.5" font-weight="700">E</text>
+                        <text x="0" y="86" text-anchor="middle" fill="#94a3b8" font-size="7.5" font-weight="700">S</text>
+                        <text x="-83" y="3" text-anchor="middle" fill="#94a3b8" font-size="7.5" font-weight="700">W</text>
+                    </g>
+
+                    <!-- Dynamic Player Blips Group -->
+                    <g id="radar-blips-group"></g>
+
+                    <!-- Center Local Player Chevron -->
+                    <g id="radar-local-player">
+                        <circle cx="0" cy="0" r="3.2" fill="#38bdf8" filter="url(#glow)" />
+                        <polygon points="0,-7 3.5,3 -3.5,3" fill="#a855f7" stroke="#ffffff" stroke-width="0.6" />
+                    </g>
+                </svg>
+            </div>
+            <div class="radar-footer">
+                <span class="radar-target-pill" id="radar-targets-count">0 TARGETS</span>
+                <span id="radar-scan-status">LIVE SCAN</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 4. Keybinds Info Overlay (Links oben) -->
+    <div id="keybinds-widget">
+        <div class="widget-header">
+            <span>Keybinds</span>
+        </div>
+        <div class="widget-body" id="keybinds-list-body">
+            <!-- Dynamisch befüllt -->
+        </div>
+    </div>
+
+    <!-- 5. Interactive "Enter a Key" Modal -->
+    <div id="rebind-overlay">
+        <div class="rebind-box">
+            <div class="rebind-title">Enter a Key</div>
+            <div class="rebind-action-name" id="rebind-action-text">Action: Toggle Noclip</div>
+            <div class="rebind-subtext">Drücke eine beliebige Taste oder Maustaste (inkl. Seitentasten M4/M5)</div>
+            <div class="rebind-hint">[ESC] zum Abbrechen</div>
+        </div>
+    </div>
+
+    <!-- 6. NUI FOV Circle Overlay -->
+    <div id="fov-overlay" style="display: none;">
+        <svg width="100%" height="100%" style="position: absolute; top: 0; left: 0;">
+            <circle id="fov-circle" cx="50%" cy="50%" r="85" fill="none" stroke="rgba(255, 255, 255, 0.85)" stroke-width="1.1" />
+        </svg>
+    </div>
+
+    <!-- 7. NUI Snapline Overlay -->
+    <svg id="snapline-overlay" width="100%" height="100%" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 499;">
+        <line id="snapline" x1="50%" y1="50%" x2="50%" y2="50%" stroke="#000000" stroke-width="1.8" stroke-linecap="round" style="display: none;" />
+    </svg>
+
+    <script>
+        let acHideTimer = null;
+
+        // Auto-Loading Sequenz aufrufen
+        function runLoadingSequence(callback) {
+            const screen = document.getElementById("loading-screen");
+            const statusEl = document.getElementById("loading-status");
+            const barEl = document.getElementById("loading-bar-fill");
+            if (!screen || !statusEl || !barEl) return;
+
+            screen.style.display = "flex";
+            screen.style.opacity = "1";
+
+            // Step 1: Authenticating
+            statusEl.textContent = "Authenticating...";
+            barEl.style.width = "25%";
+
+            setTimeout(() => {
+                // Step 2: Detecting AC
+                statusEl.textContent = "Detecting AntiCheat(s)...";
+                barEl.style.width = "60%";
+
+                setTimeout(() => {
+                    // Step 3: Building UI
+                    statusEl.textContent = "Building UI & Initializing...";
+                    barEl.style.width = "90%";
+
+                    setTimeout(() => {
+                        // Step 4: Ready
+                        statusEl.textContent = "Loaded Successfully!";
+                        barEl.style.width = "100%";
+
+                        setTimeout(() => {
+                            // Fade out loading screen
+                            screen.style.opacity = "0";
+                            setTimeout(() => {
+                                screen.style.display = "none";
+                                if (callback) callback();
+                            }, 600);
+                        }, 500);
+                    }, 800);
+                }, 800);
+            }, 800);
+        }
+
+        // AC Badge anzeigen und nach ein paar Sekunden oben verschwinden lassen
+        function showAcBadgeWithTimeout(acData) {
+            const badgeEl = document.getElementById("ac-badge");
+            const textEl = document.getElementById("ac-badge-text");
+            if (!badgeEl || !textEl) return;
+
+            if (acData && acData.visible === false) {
+                badgeEl.style.opacity = "0";
+                setTimeout(() => { badgeEl.style.display = "none"; }, 500);
+                return;
+            }
+
+            textEl.textContent = (acData && acData.text) ? acData.text : "No AC detected";
+            badgeEl.className = "ac-badge show" + (acData && acData.detected ? " detected" : " clean");
+            badgeEl.style.display = "flex";
+            badgeEl.style.opacity = "1";
+
+            if (acHideTimer) clearTimeout(acHideTimer);
+
+            // Nach 4.5 Sekunden oben wieder sauber ausblenden wie gewünscht!
+            acHideTimer = setTimeout(() => {
+                badgeEl.style.opacity = "0";
+                setTimeout(() => { badgeEl.style.display = "none"; }, 500);
+            }, 4500);
+        }
+
+                // Spectator List aktualisieren (sicher & aktiv anzeigen!)
+        function updateSpectators(data) {
+            const widget = document.getElementById("spectator-widget");
+            const countEl = document.getElementById("spec-count");
+            const bodyEl = document.getElementById("spec-list-body");
+            const headerDot = document.getElementById("spec-header-dot");
+            if (!widget || !bodyEl || !countEl) return;
+
+            let isVisible = false;
+            let specs = [];
+            if (Array.isArray(data)) {
+                specs = data;
+                isVisible = specs.length > 0;
+            } else if (data && typeof data === "object") {
+                isVisible = data.visible !== false;
+                specs = data.spectators || [];
+            }
+
+            if (!isVisible) {
+                widget.style.display = "none";
+                return;
+            }
+
+            widget.style.display = "flex";
+            countEl.textContent = specs.length;
+
+            if (specs.length === 0) {
+                widget.classList.remove("threat");
+                if (headerDot) {
+                    headerDot.className = "widget-dot-green";
+                }
+                bodyEl.innerHTML = `
+                    <div class="spec-safe-item">
+                        <span class="safe-pulse-dot"></span>
+                        <span>0 DETECTED · SECURE</span>
+                    </div>
+                `;
+            } else {
+                widget.classList.add("threat");
+                if (headerDot) {
+                    headerDot.className = "widget-dot-red";
+                }
+                bodyEl.innerHTML = "";
+                specs.forEach(s => {
+                    const row = document.createElement("div");
+                    row.className = "spec-item";
+                    const roleBadge = s.isAdmin ? `<span class="spec-role-admin">ADMIN</span>` : `<span class="spec-role-user">SPEC</span>`;
+                    const distText = (s.dist !== undefined) ? `<span class="spec-dist-badge">${Math.round(s.dist)}m</span>` : '';
+                    row.innerHTML = `
+                        <div class="spec-left-info">
+                            <span class="spec-id-tag">#${s.id || 0}</span>
+                            <span class="spec-name-tag">${s.name || "Unknown"}</span>
+                        </div>
+                        <div class="spec-right-info">
+                            ${distText}
+                            ${roleBadge}
+                        </div>
+                    `;
+                    bodyEl.appendChild(row);
+                });
+            }
+        }
+
+        // Luxury 2D Tactical Radar aktualisieren
+        function updateRadar(data) {
+            const widget = document.getElementById("radar-widget");
+            if (!widget) return;
+
+            if (!data || data.enabled === false) {
+                widget.style.display = "none";
+                return;
+            }
+
+            widget.style.display = "flex";
+
+            const range = data.range || 100;
+            const rangeEl = document.getElementById("radar-range-text");
+            if (rangeEl) rangeEl.textContent = Math.round(range) + "m";
+
+            const compassGroup = document.getElementById("radar-compass-group");
+            const heading = data.heading || 0;
+            if (compassGroup) {
+                compassGroup.setAttribute("transform", `rotate(${-heading} 0 0)`);
+            }
+
+            const blipsGroup = document.getElementById("radar-blips-group");
+            const countEl = document.getElementById("radar-targets-count");
+            if (!blipsGroup) return;
+
+            blipsGroup.innerHTML = "";
+            const blips = data.blips || [];
+            if (countEl) countEl.textContent = blips.length + " TARGETS";
+
+            blips.forEach(b => {
+                const bx = (b.nx || 0) * 80;
+                const by = (b.ny || 0) * 80;
+
+                let color = "#ef4444";
+                let radius = 3.2;
+                if (b.isDead) {
+                    color = "#64748b";
+                    radius = 2.2;
+                } else if (b.isSelected) {
+                    color = "#eab308";
+                    radius = 3.8;
+                } else if (b.isAdmin) {
+                    color = "#f43f5e";
+                }
+
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", bx.toFixed(1));
+                circle.setAttribute("cy", by.toFixed(1));
+                circle.setAttribute("r", radius);
+                circle.setAttribute("fill", color);
+                if (!b.isDead) {
+                    circle.setAttribute("filter", "url(#glow)");
+                }
+                blipsGroup.appendChild(circle);
+
+                // Elevation Pfeile (über/unter dem Spieler)
+                if (b.dz && b.dz > 3.0) {
+                    const upArr = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                    upArr.setAttribute("points", `${bx.toFixed(1)},${(by - 6.5).toFixed(1)} ${(bx + 2.5).toFixed(1)},${(by - 3.5).toFixed(1)} ${(bx - 2.5).toFixed(1)},${(by - 3.5).toFixed(1)}`);
+                    upArr.setAttribute("fill", color);
+                    blipsGroup.appendChild(upArr);
+                } else if (b.dz && b.dz < -3.0) {
+                    const dnArr = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                    dnArr.setAttribute("points", `${bx.toFixed(1)},${(by + 6.5).toFixed(1)} ${(bx + 2.5).toFixed(1)},${(by + 3.5).toFixed(1)} ${(bx - 2.5).toFixed(1)},${(by + 3.5).toFixed(1)}`);
+                    dnArr.setAttribute("fill", color);
+                    blipsGroup.appendChild(dnArr);
+                }
+            });
+        }
+
+        function updateFovOverlay(fovData) {
+            const fovEl = document.getElementById("fov-overlay");
+            const circleEl = document.getElementById("fov-circle");
+            if (!fovEl || !circleEl) return;
+
+            if (!fovData || !fovData.visible) {
+                fovEl.style.display = "none";
+                return;
+            }
+
+            fovEl.style.display = "block";
+            const r = fovData.radius || 85;
+            circleEl.setAttribute("r", r);
+            if (fovData.color) circleEl.setAttribute("stroke", fovData.color);
+            if (fovData.width) circleEl.setAttribute("stroke-width", fovData.width);
+        }
+
+        function updateSnapline(lineData) {
+            const lineEl = document.getElementById("snapline");
+            if (!lineEl) return;
+
+            if (!lineData || !lineData.visible) {
+                lineEl.style.display = "none";
+                return;
+            }
+
+            lineEl.style.display = "block";
+            lineEl.setAttribute("x1", "50%");
+            lineEl.setAttribute("y1", "50%");
+            const xVal = typeof lineData.x === "number" ? (lineData.x * 100) + "%" : (lineData.x || "50%");
+            const yVal = typeof lineData.y === "number" ? (lineData.y * 100) + "%" : (lineData.y || "50%");
+            lineEl.setAttribute("x2", xVal);
+            lineEl.setAttribute("y2", yVal);
+            if (lineData.color) lineEl.setAttribute("stroke", lineData.color);
+            if (lineData.width) lineEl.setAttribute("stroke-width", lineData.width);
+        }
+
+        // Automatische Startsequenz: Sofort Loading Screen abspielen
+        window.addEventListener("DOMContentLoaded", function() {
+            runLoadingSequence(() => {
+                // Initial neutraler Status - echtes Ergebnis wird dynamisch via Lua updateAc gesetzt
+            });
+        });
+
+        // Nachrichten von FiveM Lua
+        window.addEventListener("message", function(event) {
+            let data = event.data;
+            if (!data) return;
+
+            if (typeof data === "string") {
+                try { data = JSON.parse(data); } catch(e) { return; }
+            }
+            if (!data) return;
+
+            if (data.action === "updateFov") {
+                updateFovOverlay(data.fov || data);
+            } else if (data.action === "updateAc") {
+                showAcBadgeWithTimeout(data.acBanner || data);
+            } else if (data.action === "updateSnapline") {
+                updateSnapline(data.line || data);
+            } else if (data.action === "updateSpectators") {
+                updateSpectators(data.spectators || []);
+            } else if (data.action === "updateKeybinds") {
+                updateKeybinds(data.keybinds || data);
+            } else if (data.action === "setRebindModal") {
+                setRebindModal(data);
+            } else if (data.action === "startLoading") {
+                runLoadingSequence(() => {
+                    showAcBadgeWithTimeout(data.acBanner || { text: "Detected AntiCheat(s): WaveShield, ElectronAC", detected: true });
+                });
+            } else if (data.action === "sync") {
+                if (data.acBanner !== undefined) showAcBadgeWithTimeout(data.acBanner);
+                if (data.fov !== undefined) updateFovOverlay(data.fov);
+                if (data.line !== undefined) updateSnapline(data.line);
+                if (data.spectators !== undefined) updateSpectators(data.spectators);
+                if (data.radar !== undefined) updateRadar(data.radar);
+                if (data.keybinds !== undefined) updateKeybinds(data.keybinds);
+            }
+        });
+    </script>
+</body>
+</html>
