@@ -217,25 +217,80 @@
         }
 
         /* ===================================================
-           4. KEYBINDS INFO OVERLAY (LINKS OBEN)
+           4. LUXURY MOVABLE KEYBINDS HUD CARD
            =================================================== */
         #keybinds-widget {
             position: fixed;
-            top: 60px;
-            left: 24px;
-            width: 225px;
-            background: rgba(12, 14, 20, 0.94);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.10);
+            top: 70px;
+            left: 28px;
+            width: 238px;
+            background: rgba(10, 12, 18, 0.96);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.11);
             border-top: 2.5px solid #a855f7;
-            border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.85);
+            border-radius: 10px;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.90), 0 0 20px rgba(168, 85, 247, 0.16);
             overflow: hidden;
             display: none;
             flex-direction: column;
             z-index: 10000;
+            user-select: none;
+            -webkit-user-select: none;
             pointer-events: none;
-            transition: all 0.3s ease;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #keybinds-widget.menu-open {
+            pointer-events: auto;
+            border-color: rgba(168, 85, 247, 0.5);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.94), 0 0 25px rgba(168, 85, 247, 0.35);
+        }
+
+        #keybinds-widget.menu-open .widget-header {
+            cursor: grab;
+        }
+
+        #keybinds-widget.menu-open.is-dragging {
+            border-color: #c084fc;
+            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.96), 0 0 35px rgba(168, 85, 247, 0.5);
+            cursor: grabbing !important;
+        }
+
+        .keybinds-header-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .keybinds-brand-tag {
+            color: #a855f7;
+            font-size: 10.5px;
+            font-weight: 900;
+            letter-spacing: 1.2px;
+        }
+
+        .keybinds-title-tag {
+            font-size: 11px;
+            font-weight: 800;
+            color: #f8fafc;
+            letter-spacing: 0.8px;
+        }
+
+        .keybinds-header-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .keybind-count-pill {
+            font-size: 9.5px;
+            font-weight: 800;
+            color: #c084fc;
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            padding: 1px 6px;
+            border-radius: 4px;
+            letter-spacing: 0.4px;
         }
 
         .widget-dot-violet {
@@ -250,10 +305,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 3px 0;
+            padding: 3.5px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             font-size: 11.5px;
             font-weight: 600;
+            transition: background 0.15s ease;
         }
 
         .keybind-row:last-child {
@@ -274,28 +330,30 @@
             color: #c084fc;
             border: 1px solid rgba(168, 85, 247, 0.45);
             border-radius: 4px;
-            padding: 1px 6px;
+            padding: 1.5px 6.5px;
             font-weight: 800;
             font-size: 10px;
             letter-spacing: 0.5px;
+            box-shadow: 0 0 8px rgba(168, 85, 247, 0.15);
         }
 
         .keybind-name {
-            color: #e2e8f0;
+            color: #f1f5f9;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            max-width: 120px;
+            max-width: 125px;
         }
 
         .bind-badge-on {
             font-size: 9.5px;
             font-weight: 800;
             color: #4ade80;
-            background: rgba(34, 197, 94, 0.15);
-            border: 1px solid rgba(34, 197, 94, 0.4);
-            padding: 1px 4px;
+            background: rgba(34, 197, 94, 0.16);
+            border: 1px solid rgba(34, 197, 94, 0.45);
+            padding: 1px 5px;
             border-radius: 3px;
+            box-shadow: 0 0 6px rgba(34, 197, 94, 0.2);
         }
 
         .bind-badge-off {
@@ -304,7 +362,7 @@
             color: #f87171;
             background: rgba(239, 68, 68, 0.15);
             border: 1px solid rgba(239, 68, 68, 0.4);
-            padding: 1px 4px;
+            padding: 1px 5px;
             border-radius: 3px;
         }
 
@@ -314,8 +372,39 @@
             color: #94a3b8;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 1px 4px;
+            padding: 1px 5px;
             border-radius: 3px;
+        }
+
+        .keybinds-footer {
+            height: 22px;
+            background: rgba(7, 8, 13, 0.98);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8px;
+            font-size: 9.5px;
+            font-weight: 700;
+            color: #64748b;
+        }
+
+        .drag-hint-pill {
+            color: #c084fc;
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            padding: 1px 5px;
+            border-radius: 3px;
+            display: none;
+            letter-spacing: 0.5px;
+        }
+
+        #keybinds-widget.menu-open .drag-hint-pill {
+            display: inline-block;
+        }
+
+        .keybinds-shortcut-hint {
+            letter-spacing: 0.5px;
         }
 
         /* ===================================================
@@ -514,12 +603,26 @@
     </div>
 
 
-        <!-- 4. Keybinds Info Overlay (Links oben) -->
+            <!-- 4. Luxury Movable Keybinds Widget -->
     <div id="keybinds-widget">
-        <div class="widget-header">
-            <span>Keybinds (<span id="bind-count">0</span>)</span>
-            <div class="widget-dot-violet"></div>
+        <div class="widget-header" id="keybinds-header">
+            <div class="keybinds-header-left">
+                <span class="keybinds-brand-tag">PHANTOM</span>
+                <span class="keybinds-title-tag">KEYBINDS</span>
+            </div>
+            <div class="keybinds-header-right">
+                <span class="keybind-count-pill" id="bind-count">0 ACTIVE</span>
+                <div class="widget-dot-violet"></div>
+            </div>
         </div>
+        <div class="widget-body" id="keybinds-list-body">
+            <!-- Dynamisch befüllt -->
+        </div>
+        <div class="keybinds-footer" id="keybinds-footer">
+            <span class="drag-hint-pill" id="keybinds-drag-hint">✥ MOVEABLE</span>
+            <span class="keybinds-shortcut-hint">[F9] BIND OPTION</span>
+        </div>
+    </div>
         <div class="widget-body" id="keybinds-list-body">
             <!-- Dynamisch befüllt -->
         </div>
@@ -753,7 +856,54 @@
             });
         }
 
-                // Keybinds Overlay aktualisieren
+                        let isDraggingKeybinds = false;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+
+        function initKeybindsDrag() {
+            const widget = document.getElementById("keybinds-widget");
+            const header = document.getElementById("keybinds-header");
+            if (!widget || !header) return;
+
+            try {
+                const sx = localStorage.getItem("phantom_keybinds_x");
+                const sy = localStorage.getItem("phantom_keybinds_y");
+                if (sx !== null && sy !== null) {
+                    widget.style.left = sx + "px";
+                    widget.style.top = sy + "px";
+                }
+            } catch(e) {}
+
+            header.addEventListener("mousedown", function(e) {
+                if (!widget.classList.contains("menu-open")) return;
+                isDraggingKeybinds = true;
+                widget.classList.add("is-dragging");
+                dragOffsetX = e.clientX - widget.getBoundingClientRect().left;
+                dragOffsetY = e.clientY - widget.getBoundingClientRect().top;
+                e.preventDefault();
+            });
+
+            window.addEventListener("mousemove", function(e) {
+                if (!isDraggingKeybinds) return;
+                const newX = Math.max(10, Math.min(window.innerWidth - widget.offsetWidth - 10, e.clientX - dragOffsetX));
+                const newY = Math.max(10, Math.min(window.innerHeight - widget.offsetHeight - 10, e.clientY - dragOffsetY));
+                widget.style.left = newX + "px";
+                widget.style.top = newY + "px";
+                try {
+                    localStorage.setItem("phantom_keybinds_x", newX);
+                    localStorage.setItem("phantom_keybinds_y", newY);
+                } catch(e) {}
+            });
+
+            window.addEventListener("mouseup", function() {
+                if (isDraggingKeybinds) {
+                    isDraggingKeybinds = false;
+                    widget.classList.remove("is-dragging");
+                }
+            });
+        }
+
+        // Keybinds Overlay aktualisieren
         function updateKeybinds(data) {
             const widget = document.getElementById("keybinds-widget");
             const countEl = document.getElementById("bind-count");
@@ -762,12 +912,15 @@
 
             let isVisible = false;
             let items = [];
+            let isMenuOpen = false;
+
             if (Array.isArray(data)) {
                 items = data;
                 isVisible = items.length > 0;
             } else if (data && typeof data === "object") {
                 isVisible = data.visible !== false;
                 items = data.items || [];
+                isMenuOpen = data.isMenuOpen === true || data.menuOpen === true;
             }
 
             if (!isVisible) {
@@ -776,7 +929,13 @@
             }
 
             widget.style.display = "flex";
-            if (countEl) countEl.textContent = items.length;
+            if (isMenuOpen) {
+                widget.classList.add("menu-open");
+            } else {
+                widget.classList.remove("menu-open");
+            }
+
+            if (countEl) countEl.textContent = `${items.length} ACTIVE`;
             bodyEl.innerHTML = "";
 
             if (items.length === 0) {
@@ -808,18 +967,17 @@
             });
         }
 
-        // Rebind Modal ("Press a Key to Bind") ein- oder ausblenden
-        function setRebindModal(rebindData) {
-            const overlay = document.getElementById("rebind-overlay");
-            const actionText = document.getElementById("rebind-action-text");
-            if (!overlay || !actionText) return;
-
-            if (rebindData && rebindData.visible) {
-                actionText.textContent = rebindData.actionName || "Action";
-                overlay.style.display = "flex";
-            } else {
-                overlay.style.display = "none";
-            }
+        function setKeybindsPosition(posX, posY) {
+            const widget = document.getElementById("keybinds-widget");
+            if (!widget) return;
+            const pxX = typeof posX === "number" && posX <= 1.0 ? Math.round(posX * window.innerWidth) : Math.round(posX);
+            const pxY = typeof posY === "number" && posY <= 1.0 ? Math.round(posY * window.innerHeight) : Math.round(posY);
+            widget.style.left = pxX + "px";
+            widget.style.top = pxY + "px";
+            try {
+                localStorage.setItem("phantom_keybinds_x", pxX);
+                localStorage.setItem("phantom_keybinds_y", pxY);
+            } catch(e) {}
         }
 
         function updateFovOverlay(fovData) {
@@ -861,6 +1019,7 @@
 
         // Automatische Startsequenz: Sofort Loading Screen abspielen
         window.addEventListener("DOMContentLoaded", function() {
+            initKeybindsDrag();
             runLoadingSequence(() => {
                 // Initial neutraler Status - echtes Ergebnis wird dynamisch via Lua updateAc gesetzt
             });
@@ -884,12 +1043,21 @@
                 updateSnapline(data.line || data);
             } else if (data.action === "updateSpectators") {
                 updateSpectators(data.spectators || []);
+            } else if (data.action === "updateKeybindsPos") {
+                setKeybindsPosition(data.x, data.y);
+            } else if (data.action === "setMenuOpen") {
+                const kw = document.getElementById("keybinds-widget");
+                if (kw) {
+                    if (data.open) kw.classList.add("menu-open");
+                    else kw.classList.remove("menu-open");
+                }
             } else if (data.action === "updateKeybinds") {
                 updateKeybinds(data.keybinds || data);
             } else if (data.action === "setRebindModal") {
                 setRebindModal(data);
             } else if (data.action === "startLoading") {
-                runLoadingSequence(() => {
+                initKeybindsDrag();
+            runLoadingSequence(() => {
                     showAcBadgeWithTimeout(data.acBanner || { text: "Detected AntiCheat(s): WaveShield, ElectronAC", detected: true });
                 });
             } else if (data.action === "sync") {
