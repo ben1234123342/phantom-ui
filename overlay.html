@@ -141,29 +141,121 @@
         }
 
         /* ===================================================
-           3. SPECTATOR LIST WIDGET (RECHTS OBEN - NUR WENN LEUTE DA SIND)
+           3. HUD RIGHT STACK: SPECTATOR LIST & 2D RADAR
            =================================================== */
-        #spectator-widget {
+        .hud-right-stack {
             position: fixed;
-            top: 70px;
+            top: 60px;
             right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-end;
+            z-index: 10000;
+            pointer-events: none;
+        }
+
+        #spectator-widget {
             width: 210px;
-            background: rgba(13, 15, 22, 0.94);
+            background: rgba(14, 16, 26, 0.70);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
             border: 1px solid rgba(255, 255, 255, 0.11);
             border-top: 2px solid #ef4444; /* Rot für Spectator-Alarm */
-            border-radius: 6px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), 0 0 12px rgba(239, 68, 68, 0.25);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 0 12px rgba(239, 68, 68, 0.25);
             overflow: hidden;
             display: none;
             flex-direction: column;
-            z-index: 10000;
             pointer-events: none;
             transition: opacity 0.3s ease;
         }
 
+        #radar-widget {
+            width: 206px;
+            background: rgba(14, 16, 26, 0.65);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-top: 2.5px solid #a855f7;
+            border-radius: 10px;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65), 0 0 16px rgba(168, 85, 247, 0.15);
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 6px;
+            pointer-events: none;
+        }
+
+        .radar-header {
+            width: 100%;
+            height: 26px;
+            background: rgba(22, 14, 38, 0.65);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+
+        .radar-header-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .radar-brand-tag {
+            color: #a855f7;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 1.2px;
+        }
+
+        .radar-title-tag {
+            font-size: 10.5px;
+            font-weight: 800;
+            color: #f8fafc;
+            letter-spacing: 0.8px;
+        }
+
+        .radar-range-pill {
+            font-size: 9px;
+            font-weight: 800;
+            color: #c084fc;
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            padding: 1px 5px;
+            border-radius: 3px;
+        }
+
+        .radar-viewport {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 6px 0;
+        }
+
+        .radar-footer {
+            width: 100%;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            font-size: 9px;
+            font-weight: 700;
+            color: #64748b;
+        }
+
+        .radar-target-pill {
+            color: #38bdf8;
+            font-weight: 800;
+        }
+
         .widget-header {
             height: 28px;
-            background: rgba(8, 10, 15, 0.98);
+            background: rgba(18, 14, 28, 0.70);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             align-items: center;
@@ -223,14 +315,14 @@
             position: fixed;
             top: 320px;
             left: 28px;
-            width: 236px;
-            background: rgba(12, 14, 22, 0.78);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border: 1px solid rgba(255, 255, 255, 0.10);
+            width: 238px;
+            background: rgba(18, 14, 30, 0.52);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1.5px solid rgba(168, 85, 247, 0.40);
             border-top: 2.5px solid #a855f7;
             border-radius: 10px;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65), 0 0 16px rgba(168, 85, 247, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.50), 0 0 16px rgba(168, 85, 247, 0.20);
             overflow: hidden;
             display: none;
             flex-direction: column;
@@ -241,10 +333,14 @@
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
+        #keybinds-widget .widget-header {
+            background: rgba(26, 16, 44, 0.65);
+        }
+
         #keybinds-widget.menu-open {
             pointer-events: auto;
-            border-color: rgba(168, 85, 247, 0.5);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.94), 0 0 25px rgba(168, 85, 247, 0.35);
+            border-color: rgba(168, 85, 247, 0.65);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85), 0 0 25px rgba(168, 85, 247, 0.35);
         }
 
         #keybinds-widget.menu-open .widget-header {
@@ -534,7 +630,7 @@
         </div>
 
         <!-- 2D Tactical Circular Radar Widget -->
-        <div id="radar-widget">
+        <div id="radar-widget" style="display: none;">
             <div class="radar-header">
                 <div class="radar-header-left">
                     <span class="radar-brand-tag">PHANTOM</span>
@@ -546,9 +642,9 @@
                 <svg id="radar-svg" viewBox="-100 -100 200 200" width="186" height="186">
                     <defs>
                         <radialGradient id="radar-bg-glow" cx="50%" cy="50%" r="50%">
-                            <stop offset="0%" stop-color="#141726" stop-opacity="0.95" />
-                            <stop offset="65%" stop-color="#0c0e16" stop-opacity="0.96" />
-                            <stop offset="100%" stop-color="#07080d" stop-opacity="0.98" />
+                            <stop offset="0%" stop-color="#141726" stop-opacity="0.65" />
+                            <stop offset="65%" stop-color="#0c0e16" stop-opacity="0.75" />
+                            <stop offset="100%" stop-color="#07080d" stop-opacity="0.85" />
                         </radialGradient>
                         <linearGradient id="sweep-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" stop-color="#a855f7" stop-opacity="0.32" />
